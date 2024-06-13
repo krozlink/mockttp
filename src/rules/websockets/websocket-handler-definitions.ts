@@ -71,6 +71,8 @@ export class PassThroughWebSocketHandlerDefinition extends Serializable implemen
 
     public readonly extraCACertificates: Array<{ cert: string | Buffer } | { certPath: string }> = [];
 
+    public readonly onMessage?: (data: Buffer | ArrayBuffer | Buffer[], isBinary: boolean) => void;
+
     constructor(options: PassThroughWebSocketHandlerOptions = {}) {
         super();
 
@@ -89,6 +91,7 @@ export class PassThroughWebSocketHandlerDefinition extends Serializable implemen
         }
 
         this.forwarding = options.forwarding;
+        this.onMessage = options.onMessage;
 
         this.ignoreHostHttpsErrors = options.ignoreHostHttpsErrors || [];
         if (!Array.isArray(this.ignoreHostHttpsErrors) && typeof this.ignoreHostHttpsErrors !== 'boolean') {

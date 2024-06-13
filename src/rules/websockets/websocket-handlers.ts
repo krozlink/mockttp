@@ -92,7 +92,7 @@ function isValidStatusCode(code: number) {
 
 const INVALID_STATUS_REGEX = /Invalid WebSocket frame: invalid status code (\d+)/;
 
-function pipeWebSocket(inSocket: WebSocket, outSocket: WebSocket) {
+function pipeWebSocket(inSocket: WebSocket, outSocket: WebSocket, onMessage?: (data: WebSocket.RawData, isBinary: boolean) => void) {
     const onPipeFailed = (op: string) => (err?: Error) => {
         if (!err) return;
 
@@ -101,6 +101,10 @@ function pipeWebSocket(inSocket: WebSocket, outSocket: WebSocket) {
     };
 
     inSocket.on('message', (msg, isBinary) => {
+        if (onMessage) {
+            onMessage(msg, isBinary);
+        }
+
         if (isOpen(outSocket)) {
             outSocket.send(msg, { binary: isBinary }, onPipeFailed('message'))
         }
@@ -203,9 +207,10 @@ export class PassThroughWebSocketHandler extends PassThroughWebSocketHandlerDefi
                     ?? false; // If there were no protocols specific and this is called for some reason
             },
         });
+
         this.wsServer.on('connection', (ws: InterceptedWebSocket) => {
-            pipeWebSocket(ws, ws.upstreamWebSocket);
-            pipeWebSocket(ws.upstreamWebSocket, ws);
+            pipeWebSocket(ws, ws.upstreamWebSocket, this.onMessage);
+            pipeWebSocket(ws.upstreamWebSocket, ws, this.onMessage);
         });
     }
 

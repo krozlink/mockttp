@@ -97,4 +97,9 @@ export interface PassThroughHandlerConnectionOptions {
      * cacheable-lookup module, which will cache responses.
      */
     lookupOptions?: PassThroughLookupOptions;
+
+    /**
+     * A callback that will be passed the websocket message data as it is received.
+     */
+    onMessage?: (data: Buffer | ArrayBuffer | Buffer[], isBinary: boolean) => void;
 }
